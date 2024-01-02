@@ -11,7 +11,7 @@ const Throttle = require("superagent-throttle");
 const logger = pino({ name: "servies/coinmarketcapService.ts" });
 
 const topCryptoListCache = new nodeCache({ stdTTL: 60 * 60 }); // cache ttl is 1 hour
-const cryptoToUSDPriceCache = new nodeCache({ stdTTL: 60 * 5 }); // cache ttl is 5 mins
+const cryptoToEURPriceCache = new nodeCache({ stdTTL: 60 * 5 }); // cache ttl is 5 mins
 
 const COIN_MARKETCAP_BASE_URL = "https://pro-api.coinmarketcap.com";
 
@@ -94,10 +94,10 @@ export const getTopCryptoCurrenciesWithMetaData = async (): Promise<
   }
 };
 
-export const getLatestUSDPriceData = async (
+export const getLatestEURPriceData = async (
   cmcId: string
 ): Promise<number | undefined> => {
-  const cachedData = cryptoToUSDPriceCache.get<number>(cmcId);
+  const cachedData = cryptoToEURPriceCache.get<number>(cmcId);
 
   if (cachedData !== undefined) {
     return cachedData;
@@ -105,22 +105,21 @@ export const getLatestUSDPriceData = async (
     try {
       const resp = (
         await superAgent
-          .get(
-            COIN_MARKETCAP_BASE_URL + "/v1/cryptocurrency/listings/historical"
-          )
+          .get(COIN_MARKETCAP_BASE_URL + "/v1/cryptocurrency/listings/latest")
           .use(throttle.plugin())
+          .query({ convert: "EUR" })
           .set("X-CMC_PRO_API_KEY", "39e30a5d-ca08-4ed9-9b01-311455b98975")
       ).body as topHistoricalPriceListResp;
 
       resp.data.forEach((d) => {
-        cryptoToUSDPriceCache.set(d.id, d.quote.USD.price);
+        cryptoToEURPriceCache.set(d.id, d.quote.EUR.price);
       });
 
-      logger.info("sucessfully refreshed crypto to USD cache");
+      logger.info("sucessfully refreshed crypto to EUR cache");
 
-      return cryptoToUSDPriceCache.get<number>(cmcId);
+      return cryptoToEURPriceCache.get<number>(cmcId);
     } catch (e) {
-      logger.error(e, "Failed to get latest USD price data");
+      logger.error(e, "Failed to get latest EUR price data");
       return undefined;
     }
   }

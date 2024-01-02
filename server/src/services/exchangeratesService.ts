@@ -59,9 +59,11 @@ export const getAllExchangeRates = async (): Promise<
       const resp = (
         await superAgent.get(EXCHANGE_RATE_BASE_API + "/latest").query({
           access_key: "911473ac84beb16081e3092575765dcf",
-          base: "USD",
+          base: "EUR",
         })
       ).body as { success: boolean; rates: Record<string, number> };
+
+      resp.rates["ERU"] = 1;
 
       exchangeratesapiCache.set(
         EXCHANGERATES_CACHE_KEYS.EXCHANGERATES,

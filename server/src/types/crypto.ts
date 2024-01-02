@@ -14,7 +14,7 @@ export interface cryptoCurrencyMapResponse {
 export interface historicalPriceListingResponse {
   id: number;
   quote: {
-    USD: {
+    EUR: {
       price: number;
     };
   };

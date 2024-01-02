@@ -7,11 +7,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "crypto converter api",
+            "runtimeExecutable": "/home/mats/.nvm/versions/node/v20.0.0/bin/node",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/server/src/services/coinmarketcapService.ts",
+            "runtimeArgs": ["-r","ts-node/register","-r","tsconfig-paths/register"],
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/src/server.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]
