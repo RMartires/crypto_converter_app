@@ -1,4 +1,5 @@
 import express, { Express } from "express";
+import cors from "cors";
 import pino from "pino";
 import bodyParser from "body-parser";
 import cryptoRoutes from "./routes/crypto";
@@ -6,9 +7,10 @@ import cryptoRoutes from "./routes/crypto";
 const logger = pino({ name: "server.ts" });
 
 const app: Express = express();
-const port = 3000;
+const port = 5001;
 
 app.use(bodyParser.json());
+app.use(cors());
 
 app.use("/crypto", cryptoRoutes);
 
