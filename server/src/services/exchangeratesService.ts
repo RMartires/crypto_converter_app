@@ -25,9 +25,9 @@ export const getAllCurrencies = async (): Promise<
   } else {
     try {
       const resp = (
-        await superAgent
-          .get(EXCHANGE_RATE_BASE_API + "/symbols")
-          .query({ access_key: "911473ac84beb16081e3092575765dcf" })
+        await superAgent.get(EXCHANGE_RATE_BASE_API + "/symbols").query({
+          access_key: process.env.EXCHANGE_RATE_BASE_API_KEY as string,
+        })
       ).body as { success: boolean; symbols: Record<string, string> };
 
       exchangeratesapiCache.set(
@@ -58,7 +58,7 @@ export const getAllExchangeRates = async (): Promise<
     try {
       const resp = (
         await superAgent.get(EXCHANGE_RATE_BASE_API + "/latest").query({
-          access_key: "911473ac84beb16081e3092575765dcf",
+          access_key: process.env.EXCHANGE_RATE_BASE_API_KEY as string,
           base: "EUR",
         })
       ).body as { success: boolean; rates: Record<string, number> };

@@ -44,7 +44,10 @@ export const getTopCryptoCurrenciesWithMetaData = async (): Promise<
         await superAgent
           .get(COIN_MARKETCAP_BASE_URL + "/v1/cryptocurrency/map")
           .query({ limit: 100 })
-          .set("X-CMC_PRO_API_KEY", "39e30a5d-ca08-4ed9-9b01-311455b98975")
+          .set(
+            "X-CMC_PRO_API_KEY",
+            process.env.COIN_MARKETCAP_API_KEY as string
+          )
       ).body as topCryptoCurrencyListResp;
 
       const ids = resp.data.map((d) => d.id.toString());
@@ -62,8 +65,10 @@ export const getTopCryptoCurrenciesWithMetaData = async (): Promise<
             .use(throttle.plugin())
             .set(
               "X-CMC_PRO_API_KEY",
-              "39e30a5d-ca08-4ed9-9b01-311455b98975"
-            ) as Promise<{ body: { data: Record<string, { logo: string }> } }>;
+              process.env.COIN_MARKETCAP_API_KEY as string
+            ) as Promise<{
+            body: { data: Record<string, { logo: string }> };
+          }>;
         })
       );
 
@@ -103,15 +108,41 @@ export const getLatestEURPriceData = async (
     return cachedData;
   } else {
     try {
-      const resp = (
+      const limit = 5000;
+      let start = 1;
+      const listingPriceData: topHistoricalPriceListResp["data"] = [];
+
+      let resp = (
         await superAgent
           .get(COIN_MARKETCAP_BASE_URL + "/v1/cryptocurrency/listings/latest")
           .use(throttle.plugin())
-          .query({ convert: "EUR" })
-          .set("X-CMC_PRO_API_KEY", "39e30a5d-ca08-4ed9-9b01-311455b98975")
+          .query({ convert: "EUR", limit: limit })
+          .set(
+            "X-CMC_PRO_API_KEY",
+            process.env.COIN_MARKETCAP_API_KEY as string
+          )
       ).body as topHistoricalPriceListResp;
+      listingPriceData.push(...resp.data);
 
-      resp.data.forEach((d) => {
+      while (resp.data.length === limit) {
+        start += limit;
+
+        resp = (
+          await superAgent
+            .get(COIN_MARKETCAP_BASE_URL + "/v1/cryptocurrency/listings/latest")
+            .use(throttle.plugin())
+            .query({ convert: "EUR", start: start, limit: limit })
+            .set(
+              "X-CMC_PRO_API_KEY",
+              process.env.COIN_MARKETCAP_API_KEY as string
+            )
+        ).body as topHistoricalPriceListResp;
+        listingPriceData.push(...resp.data);
+      }
+
+      logger.info(`polled total ${listingPriceData.length} crypto prices`);
+
+      listingPriceData.forEach((d) => {
         cryptoToEURPriceCache.set(d.id, d.quote.EUR.price);
       });
 
