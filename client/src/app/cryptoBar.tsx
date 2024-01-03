@@ -26,7 +26,7 @@ export default function CryptoBar() {
       headers: { "User-Agent": "insomnium/0.2.3-a" },
     };
 
-    fetch("http://localhost:5001/crypto/list", options)
+    fetch("https://www.rohitmartires.xyz/crypto/list", options)
       .then((response) => response.json())
       .then((response) => {
         const { cryptoCurrenciesList, currenciesList } = response as {
@@ -58,7 +58,7 @@ export default function CryptoBar() {
 
     SetErrMsg(null);
 
-    fetch("http://localhost:5001/crypto/convert", options)
+    fetch("https://www.rohitmartires.xyz/crypto/convert", options)
       .then((response) => {
         if (response.status === 200) {
           return response.json();
